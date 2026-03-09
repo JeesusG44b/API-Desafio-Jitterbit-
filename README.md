@@ -2,7 +2,7 @@ API Gerenciador de Pedidos
 
 API RESTful desenvolvida em Node.js para gerenciamento e transformação de pedidos. Este projeto recebe um payload JSON específico, mapeia e tipifica os dados para a língua inglesa e os armazena em um banco de dados MongoDB.
 
-🚀 Tecnologias Utilizadas
+Tecnologias Utilizadas
 
 Node.js
 
@@ -12,7 +12,7 @@ MongoDB (Banco de dados NoSQL)
 
 Mongoose (ODM para modelagem de dados do MongoDB)
 
-📦 Como rodar o projeto localmente
+Como rodar o projeto localmente
 
 Pré-requisitos
 
@@ -44,7 +44,7 @@ node api.js
 
 O servidor estará rodando em http://localhost:3000
 
-🧪 Como testar a API
+Como testar a API
 
 Pode testar esta API utilizando clientes HTTP visuais como o Postman ou o Insomnia. Alternativamente, pode utilizar o seu próprio terminal através do comando curl.
 
@@ -101,7 +101,7 @@ curl -X PUT http://localhost:3000/order/v10089015vdb-01 \
 curl -X DELETE http://localhost:3000/order/v10089015vdb-01
 
 
-🔗 Endpoints da API
+Endpoints da API
 
 1. Criar um novo pedido (POST)
 
@@ -147,10 +147,11 @@ DELETE /order/:orderId
 
 Descrição: Remove o pedido do banco de dados. Retorna Status 204.
 
-🧠 Arquitetura e Decisões
+Arquitetura e Decisões
 
 Mapping de Dados: Foi criada a função utilitária transformOrderPayload() que converte chaves como numeroPedido para orderId e realiza os devidos casts de tipos de String para Number e Date.
 
 Banco de Dados: Optou-se pelo MongoDB por se adequar perfeitamente a estruturas JSON aninhadas (Pedido contendo array de Itens), dispensando a necessidade de tabelas relacionais (Order e Items).
 
 Tratamento de Erros: Respostas padronizadas para não encontrados (404), conflitos de duplicação (409), requisições inválidas (400) e erros internos (500).
+
