@@ -1,10 +1,10 @@
 API Gerenciador de Pedidos
 
-API RESTful desenvolvida em Node.js para gerenciamento e transformação de pedidos. Este projeto recebe um payload JSON específico, mapeia e tipifica os dados para a língua inglesa e os armazena em um banco de dados MongoDB.
+API RESTful desenvolvida em Node.js para gerenciamento e transformação de pedidos. Este projeto recebe um payload JSON específico com chaves em português, mapeia e tipifica os dados para a língua inglesa e os armazena de forma estruturada em um banco de dados MongoDB.
 
 Tecnologias Utilizadas
 
-Node.js
+Node.js (Ambiente de execução JavaScript)
 
 Express.js (Framework web para rotas e requisições HTTP)
 
@@ -16,9 +16,9 @@ Como rodar o projeto localmente
 
 Pré-requisitos
 
-Ter o Node.js instalado.
+Ter o Node.js instalado na sua máquina (versão 18+ recomendada).
 
-Ter o MongoDB rodando localmente na porta padrão (27017) ou possuir uma string de conexão do MongoDB Atlas.
+Ter o MongoDB rodando localmente na porta padrão (27017) ou possuir uma string de conexão válida do MongoDB Atlas.
 
 Passo a passo
 
@@ -44,11 +44,11 @@ node api.js
 
 O servidor estará rodando em http://localhost:3000
 
-Como testar a API
+Como testar a API rapidamente
 
-Pode testar esta API utilizando clientes HTTP visuais como o Postman ou o Insomnia. Alternativamente, pode utilizar o seu próprio terminal através do comando curl.
+Você pode testar esta API utilizando clientes HTTP visuais como o Postman ou o Insomnia. Alternativamente, utilize o seu próprio terminal através do comando curl.
 
-Abaixo estão os exemplos prontos a usar no terminal:
+Abaixo estão os exemplos prontos para uso no terminal:
 
 1. Criar um novo pedido (POST)
 
@@ -101,15 +101,17 @@ curl -X PUT http://localhost:3000/order/v10089015vdb-01 \
 curl -X DELETE http://localhost:3000/order/v10089015vdb-01
 
 
-Endpoints da API
+Documentação Detalhada dos Endpoints
 
-1. Criar um novo pedido (POST)
+Abaixo estão os detalhes de requisição e as respostas esperadas para cada rota da API.
 
-POST /order
+1. Criar um novo pedido
 
-Descrição: Recebe o payload, transforma os dados e salva no banco.
+Rota: POST /order
 
-Corpo (Request):
+Descrição: Recebe o payload em português, transforma os dados para o padrão do banco (inglês/tipificado) e salva o pedido.
+
+Corpo da Requisição (JSON):
 
 {
   "numeroPedido": "v10089015vdb-01",
@@ -121,37 +123,102 @@ Corpo (Request):
 }
 
 
-2. Listar todos os pedidos (GET)
+Respostas Esperadas:
 
-GET /order/list
+201 Created (Sucesso): Retorna o objeto mapeado recém-criado.
 
-Descrição: Retorna a lista de todos os pedidos já mapeados e armazenados.
+{
+  "orderId": "v10089015vdb-01",
+  "value": 10000,
+  "creationDate": "2023-07-19T12:24:11.529Z",
+  "items": [
+    { "productId": 2434, "quantity": 1, "price": 1000 }
+  ]
+}
 
-3. Obter um pedido específico (GET)
 
-GET /order/:orderId
+409 Conflict (Erro): Se um pedido com este numeroPedido já existir.
 
-Exemplo: GET /order/v10089015vdb-01
+400 Bad Request (Erro): Se faltarem campos obrigatórios no payload.
 
-Descrição: Retorna os dados do pedido pelo ID.
+2. Listar todos os pedidos
 
-4. Atualizar um pedido (PUT)
+Rota: GET /order/list
 
-PUT /order/:orderId
+Descrição: Retorna um array contendo todos os pedidos já mapeados e armazenados no banco de dados.
 
-Descrição: Atualiza os dados de um pedido existente passando o payload de atualização.
+Respostas Esperadas:
 
-5. Deletar um pedido (DELETE)
+200 OK (Sucesso):
 
-DELETE /order/:orderId
+[
+  {
+    "orderId": "v10089015vdb-01",
+    "value": 10000,
+    "creationDate": "2023-07-19T12:24:11.529Z",
+    "items": [ ... ]
+  },
+  ...
+]
 
-Descrição: Remove o pedido do banco de dados. Retorna Status 204.
+
+3. Obter um pedido específico
+
+Rota: GET /order/:orderId
+
+Descrição: Busca e retorna os dados de um pedido específico utilizando o ID (orderId) passado na URL.
+
+Respostas Esperadas:
+
+200 OK (Sucesso): Retorna o objeto do pedido.
+
+404 Not Found (Erro): Se o pedido não for encontrado no banco de dados.
+
+{ "error": "Pedido não encontrado." }
+
+
+4. Atualizar um pedido
+
+Rota: PUT /order/:orderId
+
+Descrição: Atualiza os dados de um pedido existente. A requisição deve conter o payload completo do pedido (no formato original em português). O ID fornecido na URL prevalece sobre o payload.
+
+Corpo da Requisição (JSON): (Mesmo formato do POST)
+
+Respostas Esperadas:
+
+200 OK (Sucesso): Retorna o objeto do pedido com os dados atualizados.
+
+404 Not Found (Erro): Se o pedido especificado na URL não existir.
+
+400 Bad Request (Erro): Se o payload for inválido.
+
+5. Deletar um pedido
+
+Rota: DELETE /order/:orderId
+
+Descrição: Remove permanentemente o pedido do banco de dados com base no ID fornecido na URL.
+
+Respostas Esperadas:
+
+204 No Content (Sucesso): O pedido foi deletado com sucesso. Não retorna corpo na resposta.
+
+404 Not Found (Erro): Se o pedido não for encontrado para exclusão.
 
 Arquitetura e Decisões
 
-Mapping de Dados: Foi criada a função utilitária transformOrderPayload() que converte chaves como numeroPedido para orderId e realiza os devidos casts de tipos de String para Number e Date.
+Mapping de Dados: Foi criada a função utilitária transformOrderPayload() que intercepta a requisição e converte chaves em português (ex: numeroPedido) para os nomes das colunas do banco (ex: orderId). Ela também realiza os devidos casts de tipos de String para Number e Date.
 
-Banco de Dados: Optou-se pelo MongoDB por se adequar perfeitamente a estruturas JSON aninhadas (Pedido contendo array de Itens), dispensando a necessidade de tabelas relacionais (Order e Items).
+Banco de Dados: Optou-se pelo MongoDB por se adequar perfeitamente a estruturas JSON aninhadas (Pedido contendo um array de Itens). Isso dispensa a necessidade de tabelas relacionais separadas (Order e Items) e operações de JOIN complexas, garantindo alta performance de leitura e gravação.
 
-Tratamento de Erros: Respostas padronizadas para não encontrados (404), conflitos de duplicação (409), requisições inválidas (400) e erros internos (500).
+Tratamento de Erros: A API implementa respostas padronizadas baseadas em status HTTP semânticos:
 
+200/201/204 para sucessos.
+
+404 para recursos não encontrados.
+
+409 para conflitos de duplicação de chave.
+
+400 para requisições com dados malformados.
+
+500 para erros internos e não previstos do servidor ou do banco.
